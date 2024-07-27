@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "account.proto";
+
+option go_package = "github.com/Nu1LSpaxe/grpc-go-for-professionals/account/proto";
+
+message Accounts {
+    repeated Account values = 1;
+}

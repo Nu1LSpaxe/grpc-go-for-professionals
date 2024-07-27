@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/Nu1LSpaxe/grpc-go-for-professionals/account/proto";
+
+// enum AccountRight {
+//     ACCOUNT_RIGHT_UNSPECIFIED = 0;
+//     ACCOUNT_RIGHT_READ = 1;
+//     ACCOUNT_RIGHT_READ_WRITE = 2;
+//     ACCOUNT_RIGHT_ADMIN = 3;
+// }
+
+message Account {
+    uint64 id = 1;
+    string username = 2;
+    // AccountRight right = 3;
+}
+
+message LogoutRequest {
+    Account account = 1;
+}
+
+message LogoutResponse {}
+
+service AccountService {
+    rpc Logout (LogoutRequest) returns(LogoutResponse);
+}
