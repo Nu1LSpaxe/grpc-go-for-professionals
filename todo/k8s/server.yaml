@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-server
+spec:
+  # Make this a headless service so that each endpoint will be exposed as a separate DNS A record.
+  clusterIP: None
+  port:
+  - name: grpc
+    port: 50051
+  selector:
+    app: todo-client
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-server
+  labels:
+    app: todo-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: todo-server
+  template:
+    metadata:
+      labels:
+        appe: todo-server
+    spec:
+      containers:
+      - name: todo-server
+        image: 
+        # imagePullPolicy: Always
+        ports:
+        - name: grpc
+          containerPort: 50051
