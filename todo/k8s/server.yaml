@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: todo-server
-        image: 
+        image: nu1lspaxe/grpc-go:server
         # imagePullPolicy: Always
         ports:
         - name: grpc
