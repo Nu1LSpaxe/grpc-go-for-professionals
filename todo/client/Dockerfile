@@ -1,10 +1,7 @@
-# This is supposed to be build with the BuildKit engine
-
-FROM --platform=$BUILDPLATFORM alpine as protoc
+FROM --platform=$BUILDPLATFORM alpine:latest as protoc
 ARG BUILDPLATFORM TARGETOS TARGETARCH
 
-# downlaod the protoc binary from github
-# e.g., https://github.com/protocolbuffers/protobuf/releases/download/v25.4/protoc-25.4-linux-x86_64.zip
+# download the protoc binary from github
 RUN export PROTOC_VERSION=25.4 \
     && export PROTOC_ARCH=$(uname -m) \
     && export PROTOC_OS=$(echo $TARGETOS) \
@@ -15,7 +12,7 @@ RUN export PROTOC_VERSION=25.4 \
     && rm -f $PROTOC_ZIP
 
 FROM --platform=$BUILDPLATFORM golang:1.22-alpine as build
-ARG BUILDPLATFORM TARGETOS TARGETARCH
+ARG BUILDPLATFORM TARGETARCH
 
 # copy the protoc binary and the protobuf includes
 COPY --from=protoc /usr/local/bin/protoc /usr/local/bin/protoc
@@ -25,37 +22,28 @@ COPY --from=protoc /usr/local/include/google /usr/local/include/google
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
-# copy proto files into go/src/proto
+# copy proto into go/src/proto
 WORKDIR /go/src/proto
 COPY ./proto .
 
-# generate code out of proto files
-WORKDIR /go/src
-ENV MODULE=github.com/Nu1LSpaxe/grpc-go-for-professionals
-RUN protoc --go_out=./proto \
-    --go_opt=module=$MODULE \
-    --go-grpc_out=./proto \
-    --go-grpc_opt=module=$MODULE \
-    ./proto/v2/*.proto
-
 # copy code into go/src/app
 WORKDIR /go/src/app
-COPY ./server .
-
-# Copy all module-related files into the workspace
-COPY . .
-
-# Add the current module to the go.work file (if needed)
-RUN go work use . 
+COPY ./client .
 
 # download dependencies and build
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -o /go/bin/app
+RUN CGO_ENABLED=0 GOOS="linux" GOARCH=$TARGETARCH go build -ldflags="-s -w" -o /go/bin/app
 
-
+# here we use an alpine image because if we were using a scratch image (like in the server image)
+# we would not be able to pass SERVER_ADDR_ENV variable as command line arg.
+# this make the image a bit bigger.
 FROM alpine:latest
+ARG SERVER_ADDR="0.0.0.0:50051"
+
+# copy certs into /certs
+# COPY ./certs/ca_cert.pem ./certs/ca_cert.pem
 
 # copy the previously built binary into smaller image
-COPY --from=build /go/bin/app /app
-EXPOSE 50051
-CMD ["/app", "0.0.0.0:50051"]
+COPY --from=build /go/bin/app /
+ENV SERVER_ADDR_ENV $SERVER_ADDR
+CMD /app ${SERVER_ADDR_ENV}

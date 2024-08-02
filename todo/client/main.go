@@ -52,7 +52,7 @@ func printTasks(c pb.TodoServiceClient, fm *fieldmaskpb.FieldMask) {
 			log.Fatalf("unexpected error: %v", err)
 		}
 
-		fmt.Println(res.Task.String(), "overdue: ", res.overdue)
+		fmt.Println(res.Task.String(), "overdue: ", res.Overdue)
 	}
 }
 
@@ -81,7 +81,7 @@ func updateTasks(c pb.TodoServiceClient, reqs ...*pb.UpdateTasksRequest) {
 
 // deleteTasks calls the DeleteTasks bind streaming endpoint with the provided reqs.
 func deleteTasks(c pb.TodoServiceClient, reqs ...*pb.DeleteTasksRequest) {
-	stream, err := c.deleteTasks(context.Background())
+	stream, err := c.DeleteTasks(context.Background())
 
 	if err != nil {
 		log.Fatalf("unexpected error: %v", err)

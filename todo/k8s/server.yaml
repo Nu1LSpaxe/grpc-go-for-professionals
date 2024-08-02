@@ -5,7 +5,7 @@ metadata:
 spec:
   # Make this a headless service so that each endpoint will be exposed as a separate DNS A record.
   clusterIP: None
-  port:
+  ports:
   - name: grpc
     port: 50051
   selector:
@@ -27,7 +27,7 @@ spec:
   template:
     metadata:
       labels:
-        appe: todo-server
+        app: todo-server
     spec:
       containers:
       - name: todo-server

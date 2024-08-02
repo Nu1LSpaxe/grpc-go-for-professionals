@@ -5,6 +5,6 @@ metadata:
 spec:
   containers:
   - name: todo-client
-    image: 
+    image: nu1lspaxe/grpc-go:client
     # imagePullPolicy: Always
   restartPolicy: Never
